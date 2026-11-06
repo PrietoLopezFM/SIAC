@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="ProjectModuleManager">
-    <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Native.iml" filepath="$PROJECT_DIR$/.idea/Native.iml" />
-      <module fileurl="file://P:/Python/Tkinter/.idea/Tkinter.iml" filepath="P:/Python/Tkinter/.idea/Tkinter.iml" />
-    </modules>
-  </component>
-</project>
