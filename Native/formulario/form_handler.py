@@ -23,7 +23,6 @@ class ApplicationFormular(tk.Tk):
         # Configurar el color de fondo y hacer transparente la ventana
         self.configure(bg=cons.C_DE_FONDO_LIGHT)
         self.attributes("-alpha", 0.96)
-
         w, h = 370, 570
         util_window.centrar_ventana(self, w, h)
 

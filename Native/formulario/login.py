@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from config import constants as cons
 from util import util_window
-
+from dashboard import DashboardFormular
 class AccountsFormular(tk.Toplevel):
     """Base class for the login and registration windows."""
 
@@ -115,6 +115,8 @@ class LoginFormular(AccountsFormular):
                 parent=self,
             )
             return
+        parent=self.master
+        DashboardFormular(parent)
 
         # Add your login/database validation here.
         messagebox.showinfo(
@@ -144,8 +146,7 @@ class RegisterFormular(AccountsFormular):
 
     def build_widgets(self):
         # Full name input
-        self.name_label = tk.Label(
-            self,
+        self.name_label = tk.Label(self,
             text="Nombre completo:",
             font=("Arial", 14),
             bg=cons.C_DE_FONDO_LIGHT,
@@ -253,3 +254,4 @@ class RegisterFormular(AccountsFormular):
         parent = self.master
         self.destroy()
         LoginFormular(parent)
+
