@@ -1,5 +1,8 @@
 import tkinter as tk
 
+from config.constants import COLOR_BACKGROUND_LEFT_MENU, COLOR_LEFT_MENU_HOVER_GREEN, COLOR_LEFT_MENU_HOVER_GREEN_TEXT, \
+    COLOR_SUBTITLE_TEXT
+
 
 class LeftMenu(tk.Frame):
     def __init__(self, parent):
@@ -61,8 +64,13 @@ class LeftMenu(tk.Frame):
                 compound="left", #The allingment of the elements
                 command=item["command"],
                 anchor="w", #Link it to the left
+                borderwidth=0,
                 padx=10,
                 pady=6,
+                bg=COLOR_BACKGROUND_LEFT_MENU,
+                fg=COLOR_SUBTITLE_TEXT,
+                activebackground=COLOR_LEFT_MENU_HOVER_GREEN,
+                activeforeground=COLOR_LEFT_MENU_HOVER_GREEN_TEXT
             )
             button.pack(fill="x") #The button expands to fill the space in X
 

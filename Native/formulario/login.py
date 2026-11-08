@@ -1,108 +1,129 @@
 import tkinter as tk
 from tkinter import messagebox
+
 from config import constants as cons
-from util import util_window
 from dashboard import DashboardFormular
-class AccountsFormular(tk.Toplevel):
-    """Base class for the login and registration windows."""
 
-    def __init__(self, parent, title, width=370, height=570):
-        super().__init__(parent)
+# Fondo de las vistas: el mismo del frame blanco de form_handler.
+BG = "white"
 
-        self.title(title)
-        self.configure(bg=cons.C_DE_FONDO_LIGHT)
-        self.attributes("-alpha", 0.96)
 
-        util_window.centrar_ventana(self, width, height)
+class AccountsFormular(tk.Frame):
+    """Base de las vistas de login y registro (viven dentro de form_handler)."""
 
-        self.show_password = tk.BooleanVar(value=False)
+    def __init__(self, parent, controller):
+        super().__init__(parent, bg=BG)
+        self.controller = controller
+
+        self.show_password = tk.BooleanVar(master=self, value=False)
         self.build_widgets()
 
+    def create_entry(self, **kwargs):
+        """Crea un Entry con el estilo del formulario (ej. show="*" para contraseña)."""
+        return tk.Entry(
+            self,
+            width=30,
+            bg=cons.COLOR_BACKGROUND_ELEMENTS,
+            fg=cons.COLOR_INPUT_TEXT,
+            relief="flat",
+            highlightthickness=1,
+            highlightbackground=cons.COLOR_BORDER_ELEMENTS,  # borde sin foco
+            highlightcolor=cons.COLOR_BORDER_ELEMENTS,       # borde con foco
+            **kwargs,
+        )
+
     def build_widgets(self):
-        """Create fields shared by the login and registration forms."""
+        """Crea los campos compartidos por login y registro."""
         self.email_label = tk.Label(
             self,
             text="Correo electrónico:",
             font=("Arial", 14),
-            bg=cons.C_DE_FONDO_LIGHT,
+            bg=BG,
         )
-        self.email_label.pack(padx=10, pady=(20, 5))
+        self.email_label.pack(padx=10, pady=(10, 5))
 
-        self.email_entry = tk.Entry(self, width=30,
-            bg=cons.C_CAJA_TEXTO_LIGHT, fg=cons.C_CONTORNO_LIGHT)
+        self.email_entry = self.create_entry()
         self.email_entry.pack(padx=10, pady=5)
 
         self.password_label = tk.Label(
             self,
             text="Contraseña:",
             font=("Arial", 14),
-            bg=cons.C_DE_FONDO_LIGHT,
+            bg=BG,
         )
-        self.password_label.pack(padx=10, pady=(15, 5))
+        self.password_label.pack(padx=10, pady=(10, 5))
 
-        self.password_entry = tk.Entry(self, width=30, show="*",
-            bg=cons.C_CAJA_TEXTO_LIGHT, fg=cons.C_CONTORNO_LIGHT)
+        self.password_entry = self.create_entry(show="*")
         self.password_entry.pack(padx=10, pady=5)
 
     def toggle_password(self):
-        """Show or hide the password field."""
+        """Muestra u oculta la contraseña."""
         self.password_entry.config(
             show="" if self.show_password.get() else "*"
         )
 
     def add_show_password_checkbox(self):
-        # Show password checkbox
         self.ck_box_show_password = tk.Checkbutton(
             self,
             text="Mostrar contraseña",
             variable=self.show_password,
             command=self.toggle_password,
-            bg=cons.C_DE_FONDO_LIGHT,
+            bg="white",
+            activebackground="white",
+            fg="black",
+            activeforeground="black",
+            selectcolor="white",
+            highlightthickness=1,
+            highlightbackground=cons.COLOR_BUTTON_GREEN,
+            highlightcolor=cons.COLOR_BUTTON_GREEN_TEXT,
+            bd=1,
+            relief="solid",
+            padx=8,
+            pady=4,
         )
         self.ck_box_show_password.pack(padx=10, pady=5)
 
 
 class LoginFormular(AccountsFormular):
-    """Login window."""
-
-    def __init__(self, parent):
-        super().__init__(parent, title="Login")
+    """Vista de inicio de sesión."""
 
     def build_widgets(self):
         super().build_widgets()
 
         self.add_show_password_checkbox()
 
-        # Login button
+        # Botón de login
         self.login_button = tk.Button(
             self,
             text="Iniciar sesión",
             width=18,
             command=self.login,
-            bg=cons.C_BOTONES_LIGHT
+            bg=cons.COLOR_BUTTON_GREEN,
+            fg=cons.COLOR_BUTTON_GREEN_TEXT,
         )
-        self.login_button.pack(padx=10, pady=15)
+        self.login_button.pack(padx=10, pady=12)
 
-        # Forgot Password link
+        # Olvidé mi contraseña
         self.forgot_password_button = tk.Button(
             self,
             text="¿Olvidaste tu contraseña?",
             relief="flat",
             command=self.forgot_password_action,
-            bg=cons.C_BOTONES_LIGHT
+            bg=cons.COLOR_BUTTON_GREEN,
+            fg=cons.COLOR_BUTTON_GREEN_TEXT,
         )
         self.forgot_password_button.pack(padx=10, pady=5)
 
-        # No account button
+        # Ir a registro
         self.no_account_button = tk.Button(
             self,
             text="¿No tienes cuenta? Crear cuenta",
             relief="flat",
-            command=self.open_register_form,
-            bg=cons.C_BOTONES_LIGHT,
+            command=lambda: self.controller.show_view("register"),
+            bg=cons.COLOR_BUTTON_GREEN,
+            fg=cons.COLOR_BUTTON_GREEN_TEXT,
         )
         self.no_account_button.pack(padx=10, pady=5)
-
 
     def login(self):
         email = self.email_entry.get().strip()
@@ -115,15 +136,10 @@ class LoginFormular(AccountsFormular):
                 parent=self,
             )
             return
-        parent=self.master
-        DashboardFormular(parent)
 
-        # Add your login/database validation here.
-        messagebox.showinfo(
-            "Login",
-            f"Se ingresó el correo: {email}",
-            parent=self,
-        )
+        # TODO: agregar aquí la validación con la base de datos.
+        # Mientras tanto el acceso es libre para poder probar la aplicación.
+        DashboardFormular(self.controller)
 
     def forgot_password_action(self):
         messagebox.showinfo(
@@ -132,66 +148,59 @@ class LoginFormular(AccountsFormular):
             parent=self,
         )
 
-    def open_register_form(self):
-        parent = self.master
-        self.destroy()
-        RegisterFormular(parent)
-
 
 class RegisterFormular(AccountsFormular):
-    """Registration window."""
-
-    def __init__(self, parent):
-        super().__init__(parent, title="Registro", width=370, height=700)
+    """Vista de registro."""
 
     def build_widgets(self):
-        # Full name input
-        self.name_label = tk.Label(self,
+        # Nombre completo
+        self.name_label = tk.Label(
+            self,
             text="Nombre completo:",
             font=("Arial", 14),
-            bg=cons.C_DE_FONDO_LIGHT,
+            bg=BG,
         )
-        self.name_label.pack(padx=10, pady=(20, 5))
+        self.name_label.pack(padx=10, pady=(10, 5))
 
-        self.name_input = tk.Entry(self, width=30)
+        self.name_input = self.create_entry()
         self.name_input.pack(padx=10, pady=5)
 
-        # Phone input
+        # Teléfono
         self.phone_label = tk.Label(
             self,
             text="Teléfono:",
             font=("Arial", 14),
-            bg=cons.C_DE_FONDO_LIGHT,
+            bg=BG,
         )
-        self.phone_label.pack(padx=10, pady=(15, 5))
+        self.phone_label.pack(padx=10, pady=(10, 5))
 
-        self.phone_entry = tk.Entry(self, width=30)
+        self.phone_entry = self.create_entry()
         self.phone_entry.pack(padx=10, pady=5)
 
-        # Shared email and password inputs
+        # Correo y contraseña compartidos
         super().build_widgets()
 
         self.add_show_password_checkbox()
 
-        # Register button
+        # Botón de registro
         self.register_button = tk.Button(
             self,
             text="Crear cuenta",
             width=18,
             command=self.register,
         )
-        self.register_button.pack(padx=10, pady=15)
+        self.register_button.pack(padx=10, pady=12)
 
-        # Already have an account? button
+        # ¿Ya tienes cuenta?
         self.account_already_button = tk.Button(
             self,
             text="¿Ya tienes cuenta? Iniciar sesión",
             relief="flat",
-            command=self.open_login_form,
-            bg=cons.C_BOTONES_LIGHT,
+            command=lambda: self.controller.show_view("login"),
+            bg=cons.COLOR_BUTTON_GREEN,
+            fg=cons.COLOR_BUTTON_GREEN_TEXT,
         )
         self.account_already_button.pack(padx=10, pady=5)
-
 
     def register(self):
         full_name = self.name_input.get().strip()
@@ -210,11 +219,10 @@ class RegisterFormular(AccountsFormular):
         self.is_institutional_email(email, full_name, phone)
 
     def is_institutional_email(self, email, full_name, phone):
-        # Validate if the email is an institutional one to store it as such in the database.
+        # Valida si el correo es institucional para guardarlo como tal en la BD.
         institutional_email = email.lower().endswith("@utr.edu.mx")
 
         if institutional_email:
-            # Is an institutional email
             messagebox.showinfo(
                 "Correo institucional",
                 f"¡Cuenta creada!\nNombre: {full_name}\nCorreo: {email}",
@@ -232,7 +240,6 @@ class RegisterFormular(AccountsFormular):
             VALUES (@student_person_id);
             """
         else:
-            # Is a personal email
             messagebox.showinfo(
                 "Correo personal",
                 f"¡Cuenta creada!\nNombre: {full_name}\nCorreo: {email}",
@@ -249,9 +256,3 @@ class RegisterFormular(AccountsFormular):
             INSERT INTO student (person_id)
             VALUES (@student_person_id);
             """
-
-    def open_login_form(self):
-        parent = self.master
-        self.destroy()
-        LoginFormular(parent)
-
