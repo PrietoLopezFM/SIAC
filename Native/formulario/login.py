@@ -4,6 +4,8 @@ from tkinter import messagebox
 from config import constants as cons
 from dashboard import DashboardFormular
 
+from models import authenticate_mock
+
 # Fondo de las vistas: el mismo del frame blanco de form_handler.
 BG = "white"
 
@@ -129,6 +131,8 @@ class LoginFormular(AccountsFormular):
         email = self.email_entry.get().strip()
         password = self.password_entry.get()
 
+
+
         if not email or not password:
             messagebox.showwarning(
                 "Campos incompletos",
@@ -136,6 +140,17 @@ class LoginFormular(AccountsFormular):
                 parent=self,
             )
             return
+
+        user = authenticate_mock(email, password)
+
+        if user is None:
+            messagebox.showerror(
+                "Inicio de sesión fallido",
+                "Correo electrónico o contraseña incorrectos.",
+                parent=self,
+            )
+            return
+        self.controller.current_user = user
 
         # TODO: agregar aquí la validación con la base de datos.
         # Mientras tanto el acceso es libre para poder probar la aplicación.
