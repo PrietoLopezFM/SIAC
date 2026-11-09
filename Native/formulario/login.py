@@ -4,7 +4,7 @@ from tkinter import messagebox
 from config import constants as cons
 from dashboard import DashboardFormular
 
-from models import authenticate_mock
+from models import authenticate_mock, get_person_by_user
 
 # Fondo de las vistas: el mismo del frame blanco de form_handler.
 BG = "white"
@@ -152,9 +152,20 @@ class LoginFormular(AccountsFormular):
             return
         self.controller.current_user = user
 
+        # Busca la persona ligada a la cuenta (misma db_id) en la "base de datos"
+        # interna. Se guarda en el controller para que otras páginas la usen.
+        self.controller.current_person = get_person_by_user(user)
+
         # TODO: agregar aquí la validación con la base de datos.
         # Mientras tanto el acceso es libre para poder probar la aplicación.
-        DashboardFormular(self.controller)
+
+        # El dashboard recibe la cuenta y la persona activas para que la
+        # barra superior muestre el nombre y el correo de quien inició sesión.
+        DashboardFormular(
+            self.controller,
+            self.controller.current_user,
+            self.controller.current_person,
+        )
 
     def forgot_password_action(self):
         messagebox.showinfo(

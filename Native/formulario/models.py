@@ -87,12 +87,32 @@ test_student = Student(
 test_user = User("Admin", "alex@utr.edu.mx", 1)
 
 
+# Mock "database" of people. It stands in for the person table until the
+# real MySQL connection exists. When that happens, get_person_by_user()
+# should become a query instead of a loop over this list.
+MOCK_PEOPLE = [test_admin, test_instructor, test_student]
+
+
 def authenticate_mock(email, password):
     """Return the mock user if the credentials match; otherwise return None."""
     if email == test_user.email and password == test_user.password:
         return test_user
 
     return None
+
+
+def get_person_by_user(user):
+    """Return the Person linked to this account (matching db_id), or None.
+
+    An account (User) and a Person share the same db_id, so test_user
+    (db_id 1) resolves to test_admin ("Alex Admin").
+    """
+    for person in MOCK_PEOPLE:
+        if person.db_id == user.db_id:
+            return person
+
+    return None
+
 
 test_activity = Activity(
     "Science Fair", "Annual student science fair", "academic", 3, 50

@@ -4,17 +4,15 @@ from config.constants import COLOR_BACKGROUND_SECONDARY_RED
 
 
 class TopBar(tk.Frame):
-    def __init__(
-        self,
-        parent,
-        user_name="Admin",
-        user_email="admin@example.com",
-    ):
+    def __init__(self, parent, user, person):
         super().__init__(parent, bg=COLOR_BACKGROUND_SECONDARY_RED)
-        self.user_name = user_name
-        self.user_email = user_email
+
+        self.user = user
+        self.person = person
         self.images = []  # Keep image references alive.
+
         self.build_widgets()
+        self.update_user_menu()
 
     def load_image(self, path):
         image = tk.PhotoImage(file=path)
@@ -23,7 +21,7 @@ class TopBar(tk.Frame):
 
     def build_widgets(self):
         self.configure(height=70)
-        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(2, weight=1)
 
         # Logos
         utr_logo = self.load_image("resources/placeholder.png")
@@ -41,7 +39,7 @@ class TopBar(tk.Frame):
             bg=COLOR_BACKGROUND_SECONDARY_RED,
         ).grid(row=0, column=1, padx=5)
 
-        # App name and full name, stacked vertically
+        # App title
         title_frame = tk.Frame(self, bg=COLOR_BACKGROUND_SECONDARY_RED)
         title_frame.grid(row=0, column=2, sticky="w", padx=10)
 
@@ -61,12 +59,11 @@ class TopBar(tk.Frame):
             fg="white",
         ).pack(anchor="w")
 
-        # User button and dropdown menu
+        # User button
         user_icon = self.load_image("resources/placeholder.png")
 
-        user_button = tk.Button(
+        self.user_button = tk.Button(
             self,
-            text=f"{self.user_name}  ∨",
             image=user_icon,
             compound="top",
             command=self.show_user_menu,
@@ -76,20 +73,23 @@ class TopBar(tk.Frame):
             activebackground=COLOR_BACKGROUND_SECONDARY_RED,
             activeforeground="white",
         )
-        user_button.grid(row=0, column=3, padx=15)
+        self.user_button.grid(row=0, column=3, padx=15)
 
-        self.user_menu = tk.Menu(
-            self,
-            tearoff=False,
-            bg="white",
-            fg="black",
-        )
-        self.user_menu.add_command(label=self.user_name, state="disabled")
-        self.user_menu.add_command(label=self.user_email, state="disabled")
+        # User menu
+        self.user_menu = tk.Menu(self, tearoff=False, bg="white", fg="black")
+        self.user_menu.add_command(label="", state="disabled")
+        self.user_menu.add_command(label="", state="disabled")
+
+    def update_user_menu(self):
+        """Update the button and menu using the supplied account and person."""
+        self.user_button.configure(text=f"{self.person.full_name}  ∨")
+        self.user_menu.entryconfigure(0, label=self.person.full_name)
+
+        # Use the account email for the logged-in account.
+        self.user_menu.entryconfigure(1, label=self.user.email)
 
     def show_user_menu(self):
-        button = self.grid_slaves(row=0, column=3)[0]
         self.user_menu.tk_popup(
-            button.winfo_rootx(),
-            button.winfo_rooty() + button.winfo_height(),
+            self.user_button.winfo_rootx(),
+            self.user_button.winfo_rooty() + self.user_button.winfo_height(),
         )

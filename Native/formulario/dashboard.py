@@ -18,8 +18,15 @@ class DashboardFormular(tk.Toplevel):
                 'Instructor' + Instructor_name
     """
 
-    def __init__(self, parent):
+    def __init__(self, parent, user, person):
+        """
+        user:   the logged-in account (models.User), used for the email.
+        person: the Person linked to that account (models.Person), used for
+                the full name. Both are supplied by login.py.
+        """
         super().__init__(parent)
+        self.user = user
+        self.person = person
         self.build_components()
 
     """
@@ -35,7 +42,8 @@ class DashboardFormular(tk.Toplevel):
         self.grid_rowconfigure(1, weight=1)
 
         # Top bar spans the width of the dashboard
-        top_bar = TopBar(self)
+        # It receives the active account and person to display their info.
+        top_bar = TopBar(self, user=self.user, person=self.person)
         top_bar.grid(row=0, column=0, columnspan=2, sticky="ew")
 
         # Left menu sits below the top bar
