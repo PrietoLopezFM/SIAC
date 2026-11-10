@@ -1,7 +1,9 @@
 import tkinter as tk
 
+from components import tarjetas_clubs
 from components.left_menu import LeftMenu
 from components.top_bar import TopBar
+from components.tarjetas_clubs import PanelPrincipal
 
 
 class DashboardFormular(tk.Toplevel):
@@ -61,4 +63,6 @@ class DashboardFormular(tk.Toplevel):
             row=0, column=0, sticky="w", padx=20, pady=20
         )
 
+        tarjetasclubs = PanelPrincipal(self)
+        tarjetasclubs.grid(row=1, column=1, sticky="w")
         # to do: Add the activity frame and its content here.
