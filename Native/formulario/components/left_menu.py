@@ -3,10 +3,21 @@ import tkinter as tk
 from config.constants import COLOR_BACKGROUND_LEFT_MENU, COLOR_LEFT_MENU_HOVER_GREEN, COLOR_LEFT_MENU_HOVER_GREEN_TEXT, \
     COLOR_SUBTITLE_TEXT
 
+# NOTE: DashboardFormular, StudentsFormular and ReportesFormular are imported
+# inside their button methods on purpose. Those windows import LeftMenu
+# themselves, so importing them here at the top would create a circular import.
+
 
 class LeftMenu(tk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent, controller):
+        """
+        parent:     the window that contains this menu.
+        controller: the app that opened that window. It holds current_user and
+                    current_person (saved by login.py), which are handed to
+                    every window opened from the menu.
+        """
         super().__init__(parent)
+        self.controller = controller
         self.build_widgets()
 
     def build_widgets(self):
@@ -15,6 +26,11 @@ class LeftMenu(tk.Frame):
         #Image_Route = The route to the image of the button
         #Command = the action the button performs
         items = [
+            {
+                "text": "Dashboard",
+                "image_route": "resources/placeholder.png",
+                "command": self.dashboard_button,
+            },
             {
                 "text": "Activities",
                 "image_route": "resources/placeholder.png",
@@ -74,17 +90,36 @@ class LeftMenu(tk.Frame):
             )
             button.pack(fill="x") #The button expands to fill the space in X
 
+    def open_window(self, window_class):
+        """Close the current window and open another one in its place.
+
+        Every in-app window receives the same (controller, user, person), so
+        they are read from the controller before the current window closes.
+        """
+        controller = self.controller
+        user = controller.current_user
+        person = controller.current_person
+
+        self.winfo_toplevel().destroy()
+        window_class(controller, user, person)
+
+    def dashboard_button(self):
+        from dashboard import DashboardFormular
+        self.open_window(DashboardFormular)
+
     def activities_button(self):
         pass
 
     def students_button(self):
-        pass
+        from students import StudentsFormular
+        self.open_window(StudentsFormular)
 
     def announcements_button(self):
         pass
 
     def reports_button(self):
-        pass
+        from reportes import ReportesFormular
+        self.open_window(ReportesFormular)
 
     def configuration_button(self):
         pass

@@ -47,7 +47,9 @@ class DashboardFormular(tk.Toplevel):
         top_bar.grid(row=0, column=0, columnspan=2, sticky="ew")
 
         # Left menu sits below the top bar
-        left_menu = LeftMenu(self)
+        # It receives the controller (self.master, the app that opened this
+        # window) so its buttons can open other windows.
+        left_menu = LeftMenu(self, controller=self.master)
         left_menu.grid(row=1, column=0, sticky="ns")
 
         # Main dashboard content

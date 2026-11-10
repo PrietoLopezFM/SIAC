@@ -25,16 +25,33 @@ class Instructor(Person):
 class Student(Person):
     def __init__(
         self, full_name, email, inst_email, phone, db_id,
-        student_number, sex, entry_year, status
+        student_number, sex, entry_year, status,
+        term="", current_club="", credits=0, club_history=None
     ):
+        """
+        The last four fields are optional so older code that builds a Student
+        without them keeps working. They feed the Students and Reportes tables.
+
+        term:         cuatrimestre the student is currently in.
+        current_club: name of the club the student is in right now.
+        credits:      accumulated credits (the tables show them as 'X/100').
+        club_history: dict {period: club name}, e.g. {"Sep-Dic 2026": "Futbol"}.
+        """
         super().__init__(full_name, email, inst_email, phone, db_id)
         self.student_number = student_number
         self.sex = sex
         self.entry_year = entry_year
         self.status = status
+        self.term = term
+        self.current_club = current_club
+        self.credits = credits
+        self.club_history = club_history if club_history is not None else {}
 
     def show_field(self, field):
-        student_fields = ("student_number", "sex", "entry_year", "status")
+        student_fields = (
+            "student_number", "sex", "entry_year", "status",
+            "term", "current_club", "credits", "club_history",
+        )
 
         if field in student_fields:
             print(getattr(self, field))
@@ -81,7 +98,40 @@ test_instructor = Instructor(
 
 test_student = Student(
     "Taylor Kim", "taylor@example.com", False, "555-0102",
-    3, "S1001", "unspecified", 2025, "active"
+    3, "S1001", "unspecified", 2025, "active",
+    term=3,
+    current_club="Futbol",
+    credits=45,
+    club_history={
+        "Sep-Dic 2026": "Futbol",
+        "Ene-Abr 2026": "Club de Lectura",
+        "May-Ago 2026": "Ajedrez",
+    },
+)
+
+# Extra students so the Students and Reportes tables show several rows.
+test_student_2 = Student(
+    "Sam Rivera", "sam@utr.edu.mx", True, "555-0103",
+    4, "S1002", "unspecified", 2024, "active",
+    term=6,
+    current_club="Ajedrez",
+    credits=80,
+    club_history={
+        "Sep-Dic 2026": "Ajedrez",
+        "Ene-Abr 2026": "Futbol",
+        "May-Ago 2026": "Club de Lectura",
+    },
+)
+
+test_student_3 = Student(
+    "Jordan Ortiz", "jordan@example.com", False, "555-0104",
+    5, "S1003", "unspecified", 2026, "active",
+    term=1,
+    current_club="Club de Lectura",
+    credits=10,
+    club_history={
+        "Sep-Dic 2026": "Club de Lectura",
+    },
 )
 
 test_user = User("Admin", "alex@utr.edu.mx", 1)
@@ -89,8 +139,11 @@ test_user = User("Admin", "alex@utr.edu.mx", 1)
 
 # Mock "database" of people. It stands in for the person table until the
 # real MySQL connection exists. When that happens, get_person_by_user()
-# should become a query instead of a loop over this list.
-MOCK_PEOPLE = [test_admin, test_instructor, test_student]
+# and get_students() should become queries instead of loops over this list.
+MOCK_PEOPLE = [
+    test_admin, test_instructor,
+    test_student, test_student_2, test_student_3,
+]
 
 
 def authenticate_mock(email, password):
@@ -112,6 +165,14 @@ def get_person_by_user(user):
             return person
 
     return None
+
+
+def get_students():
+    """Return only the Student objects (no admins nor instructors).
+
+    Used by the Students and Reportes windows to build their tables.
+    """
+    return [person for person in MOCK_PEOPLE if isinstance(person, Student)]
 
 
 test_activity = Activity(
