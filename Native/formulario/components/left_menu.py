@@ -115,7 +115,8 @@ class LeftMenu(tk.Frame):
         self.open_window(StudentsFormular)
 
     def announcements_button(self):
-        pass
+        from announcement import SeccionAnuncios
+        self.open_window(SeccionAnuncios)
 
     def reports_button(self):
         from reportes import ReportesFormular
