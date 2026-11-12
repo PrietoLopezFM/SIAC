@@ -9,11 +9,12 @@ from models import authenticate_mock, get_person_by_user
 # Fondo de las vistas: el mismo del frame blanco de form_handler.
 BG = "white"
 
-
 class AccountsFormular(tk.Frame):
     """Base de las vistas de login y registro (viven dentro de form_handler)."""
 
     def __init__(self, parent, controller):
+        #Controler is the command hereditated from the Homeview
+
         super().__init__(parent, bg=BG)
         self.controller = controller
 
@@ -64,7 +65,7 @@ class AccountsFormular(tk.Frame):
             show="" if self.show_password.get() else "*"
         )
 
-    def add_show_password_checkbox(self):
+    def add_show_password_checkbox_widget(self):
         self.ck_box_show_password = tk.Checkbutton(
             self,
             text="Mostrar contraseña",
@@ -91,7 +92,7 @@ class LoginFormular(AccountsFormular):
     def build_widgets(self):
         super().build_widgets()
 
-        self.add_show_password_checkbox()
+        self.add_show_password_checkbox_widget()
 
         # Botón de login
         self.login_button = tk.Button(
@@ -205,7 +206,7 @@ class RegisterFormular(AccountsFormular):
         # Correo y contraseña compartidos
         super().build_widgets()
 
-        self.add_show_password_checkbox()
+        self.add_show_password_checkbox_widget()
 
         # Botón de registro
         self.register_button = tk.Button(

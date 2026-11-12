@@ -13,6 +13,7 @@ class HomeView(tk.Frame):
         self.controller = controller
         self.build_widgets()
 
+    #Universal function used to build widgetsa
     def build_widgets(self):
         tk.Label(
             self,
@@ -87,7 +88,7 @@ class ApplicationFormular(tk.Tk):
             relx=0.5,
             rely=0.5,
             anchor="center",
-            relwidth=self.CONTENT_REL_WIDTH,
+            relwidth=self.CONTENT_REL_WIDTH, #Scales with the width of the
             relheight=self.CONTENT_REL_HEIGHT,
         )
         content.pack_propagate(False)
