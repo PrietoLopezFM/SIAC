@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Page</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<!-- DO NOT DELETE -->
+<div id="top-bar"></div>
+<div id="left-menu"></div>
+<!-- These connect to the script block to load the components -->
+<main>
+    <!-- Page content goes here -->
+</main>
+<!-- Keep this block to import the components to the page -->
+<script>
+    fetch("components/top_bar.html")
+        .then(response => response.text())
+        .then(html => document.getElementById("top-bar").innerHTML = html);
+    fetch("components/left_menu.html")
+        .then(response => response.text())
+        .then(html => document.getElementById("left-menu").innerHTML = html);
+</script>
+</body>
+</html>
