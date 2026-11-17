@@ -14,15 +14,14 @@ USE siac_simple;
 -- ----------------------------------------------------------------------------
 
 CREATE TABLE person (
-  person_id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  full_name            VARCHAR(150) NOT NULL,
-  email                VARCHAR(150) NOT NULL,
-  institutional_email  VARCHAR(150) NULL,
-  phone                VARCHAR(20)  NULL,
+  person_id   INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  full_name   VARCHAR(150) NOT NULL,
+  email       VARCHAR(150) NOT NULL,
+  phone       VARCHAR(20) NULL,
   PRIMARY KEY (person_id),
-  UNIQUE KEY uq_person_email (email),
-  UNIQUE KEY uq_person_inst_email (institutional_email)
+  UNIQUE KEY uq_person_email (email)
 ) ENGINE=InnoDB;
+
 
 CREATE TABLE administrator (
   person_id INT UNSIGNED NOT NULL,
@@ -55,7 +54,7 @@ CREATE TABLE student (
 CREATE TABLE account (
   person_id        INT UNSIGNED NOT NULL,
   password_hash    VARCHAR(255) NOT NULL,
-  email_verified   BOOLEAN NOT NULL DEFAULT FALSE,
+  email_verified   ENUM('personal', 'institutional') NOT NULL DEFAULT 'personal',
   status           ENUM('pending','approved') NOT NULL DEFAULT 'pending',
   approved_by      INT UNSIGNED NULL,
   approved_at      DATETIME NULL,

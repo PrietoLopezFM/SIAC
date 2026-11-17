@@ -14,15 +14,14 @@ USE siac_simple;
 -- ----------------------------------------------------------------------------
 
 CREATE TABLE person (
-  person_id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  full_name            VARCHAR(150) NOT NULL,
-  email                VARCHAR(150) NOT NULL,
-  institutional_email  BOOLEAN NOT NULL DEFAULT FALSE,
-  phone                VARCHAR(20)  NULL,
+  person_id   INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  full_name   VARCHAR(150) NOT NULL,
+  email       VARCHAR(150) NOT NULL,
+  phone       VARCHAR(20) NULL,
   PRIMARY KEY (person_id),
-  UNIQUE KEY uq_person_email (email),
-  UNIQUE KEY uq_person_inst_email (institutional_email)
+  UNIQUE KEY uq_person_email (email)
 ) ENGINE=InnoDB;
+
 
 CREATE TABLE administrator (
   person_id INT UNSIGNED NOT NULL,
@@ -55,7 +54,7 @@ CREATE TABLE student (
 CREATE TABLE account (
   person_id        INT UNSIGNED NOT NULL,
   password_hash    VARCHAR(255) NOT NULL,
-  email_verified   BOOLEAN NOT NULL DEFAULT FALSE,
+  email_verified   ENUM('personal', 'institutional') NOT NULL DEFAULT 'personal',
   status           ENUM('pending','approved') NOT NULL DEFAULT 'pending',
   approved_by      INT UNSIGNED NULL,
   approved_at      DATETIME NULL,
@@ -162,19 +161,19 @@ START TRANSACTION;
 -- ----------------------------------------------------------------------------
 
 -- 1.1 Create a student.
-INSERT INTO person (full_name, email, phone, institutional_email)
-VALUES ('Student1', 'st@personal.com', '1234', 'st@institution.com');
+INSERT INTO person (full_name, email, phone)
+VALUES ('Student1', 'st@personal.com', '1234');
 SET @student_person_id = LAST_INSERT_ID();
 
 INSERT INTO account (person_id, password_hash)
 VALUES (@student_person_id, '1234');
 
-INSERT INTO student (person_id)
-VALUES (@student_person_id);
+INSERT INTO student (person_id, entry_year)
+VALUES (@student_person_id, 2026);
 
 -- 1.2 Create an admin
-INSERT INTO person (full_name, email, phone, institutional_email)
-VALUES ('Admin1', 'admin1@institution.com', '1111', 'admin1@institution.com');
+INSERT INTO person (full_name, email, phone)
+VALUES ('Admin1', 'admin1@institution.com', '1111');
 SET @admin_person_id = LAST_INSERT_ID();
 
 INSERT INTO account (person_id, password_hash)
@@ -184,8 +183,8 @@ INSERT INTO administrator (person_id)
 VALUES (@admin_person_id);
 
 -- 1.3 Create an instructor
-INSERT INTO person (full_name, email, phone, institutional_email)
-VALUES ('Instructor1', 'instructor1@institution.com', '1111', NULL);
+INSERT INTO person (full_name, email, phone)
+VALUES ('Instructor1', 'instructor1@institution.com', '1111');
 SET @instructor_person_id = LAST_INSERT_ID();
 
 INSERT INTO account (person_id, password_hash)
@@ -313,7 +312,6 @@ SELECT
     p.person_id,
     p.full_name,
     p.email,
-    p.institutional_email,
     p.phone,
     s.student_number,
     s.sex,
@@ -330,7 +328,6 @@ SELECT
     p.person_id,
     p.full_name,
     p.email,
-    p.institutional_email,
     p.phone,
     i.employee_number,
     acc.email_verified,
@@ -344,7 +341,6 @@ SELECT
     p.person_id,
     p.full_name,
     p.email,
-    p.institutional_email,
     p.phone,
     acc.email_verified,
     acc.status AS account_status
@@ -468,3 +464,4 @@ JOIN offering o ON ses.offering_id = o.offering_id
 JOIN activity a ON o.activity_id = a.activity_id
 WHERE a.activity_type = 'extracurricular'
 ORDER BY ses.session_date, p.full_name;
+

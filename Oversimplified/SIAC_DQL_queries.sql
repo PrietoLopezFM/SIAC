@@ -21,7 +21,6 @@ SELECT
     p.person_id,
     p.full_name,
     p.email,
-    p.institutional_email,
     p.phone,
     s.student_number,
     s.sex,
@@ -34,11 +33,10 @@ JOIN person p ON s.person_id = p.person_id
 LEFT JOIN account acc ON s.person_id = acc.person_id;
 
 -- Test 2.2 Show all data from an instructor
-SELECT 
+SELECT
     p.person_id,
     p.full_name,
     p.email,
-    p.institutional_email,
     p.phone,
     i.employee_number,
     acc.email_verified,
@@ -48,11 +46,10 @@ JOIN person p ON i.person_id = p.person_id
 LEFT JOIN account acc ON i.person_id = acc.person_id;
 
 -- Test 2.3 Show all data from an admin
-SELECT 
+SELECT
     p.person_id,
     p.full_name,
     p.email,
-    p.institutional_email,
     p.phone,
     acc.email_verified,
     acc.status AS account_status
