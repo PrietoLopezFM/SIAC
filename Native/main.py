@@ -1,4 +1,4 @@
-from formulario.form_handler import ApplicationFormular
+from form_handler import ApplicationFormular
 
 app = ApplicationFormular()
 app.mainloop()

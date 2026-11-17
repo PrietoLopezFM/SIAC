@@ -1,21 +1,27 @@
-#To hash
 from argon2 import PasswordHasher
+from argon2.exceptions import InvalidHashError, VerifyMismatchError
 
-def HashPassword(key):
-    ph = PasswordHasher()
-    res = ph.hash(key)
-    print(res)
+_password_hasher = PasswordHasher()
 
-#Verify
-def VerifyPassword(hash, key):
-    ph = PasswordHasher()
-    hash = ""#ph.hash("sup") #Password to fetch from the db
+def hash_password(password):
+    #Return an Argon2 hash to store in the database.
+    return _password_hasher.hash(password)
+
+
+def verify_password(stored_hash, password):
+    #Return whether the password matches the stored hash.
     try:
-        ph.verify(hash, key)
-        print("Password match!")
-    except Exception:
-        print("Incorrect password.")
+        return _password_hasher.verify(stored_hash, password)
+    except (VerifyMismatchError, InvalidHashError):
+        return False
 
+"""
+# Test 1
+stored_hash = hash_password("john")  # Save this hash in the database.
+matches = verify_password(stored_hash, "john")
+print(matches)  # True
 
-HashPassword("john")
-VerifyPassword("sup")
+# Test 2
+b = hash_password("I have a bomb in my ASS")
+print(verify_password(b, input()))
+"""
