@@ -1,14 +1,14 @@
 class Person:
-    def __init__(self, full_name, email, inst_email, phone, db_id):
+    def __init__(self, full_name, email, email_verified, phone, db_id):
         self.full_name = full_name
         self.email = email
-        self.inst_email = inst_email
+        self.email_verified = email_verified
         self.phone = phone
         self.db_id = db_id
 
     def show_field(self, field):
         """Print one field, such as show_field("email")."""
-        if field not in ("full_name", "email", "inst_email", "phone", "db_id"):
+        if field not in ("full_name", "email", "email_verified", "phone", "db_id"):
             raise ValueError(f"Unknown Person field: {field}")
 
         print(getattr(self, field))
@@ -17,14 +17,13 @@ class Person:
 class Admin(Person):
     pass
 
-
 class Instructor(Person):
     pass
 
 
 class Student(Person):
     def __init__(
-        self, full_name, email, inst_email, phone, db_id,
+        self, full_name, email, email_verified, phone, db_id,
         student_number, sex, entry_year, status,
         term="", current_club="", credits=0, club_history=None
     ):
@@ -37,7 +36,7 @@ class Student(Person):
         credits:      accumulated credits (the tables show them as 'X/100').
         club_history: dict {period: club name}, e.g. {"Sep-Dic 2026": "Futbol"}.
         """
-        super().__init__(full_name, email, inst_email, phone, db_id)
+        super().__init__(full_name, email, email_verified, phone, db_id)
         self.student_number = student_number
         self.sex = sex
         self.entry_year = entry_year

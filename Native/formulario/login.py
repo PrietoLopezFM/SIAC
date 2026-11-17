@@ -4,15 +4,15 @@ from tkinter import messagebox
 from config import constants as cons
 from dashboard import DashboardFormular
 
-from auth.passwords import hash_password
+from auth.passwords import hash_password, verify_password
 
 from model import authenticate_mock, get_person_by_user
 
-from models.user import User
+from models.user import Admin
 
 from database.connection import start_connection
 from database.queries import insert_person, insert_account, insert_administrator
-
+from database.queries import get_administrator_by_email
 
 # Fondo de las vistas: el mismo del frame blanco de form_handler.
 BG = "white"
@@ -139,8 +139,6 @@ class LoginFormular(AccountsFormular):
         email = self.email_entry.get().strip()
         password = self.password_entry.get()
 
-
-
         if not email or not password:
             messagebox.showwarning(
                 "Campos incompletos",
@@ -149,31 +147,69 @@ class LoginFormular(AccountsFormular):
             )
             return
 
-        user = authenticate_mock(email, password)
+        # STARTING DATABASE WORK
+        connection = None
+        cursor = None
 
-        if user is None:
+        try:
+            #Start the connection and focus on a target road (the user's)
+            connection = start_connection()
+            cursor = connection.cursor()
+            row = get_administrator_by_email(cursor, email)
+
+            # No row found = no entry = incorrect details
+            if not verify_password(row[4], password):
+                messagebox.showerror(
+                    "Inicio de sesión fallido",
+                    "Correo electrónico o contraseña incorrectos.",
+                    parent=self,
+                )
+                return
+
+            if row[5] != "institutional":
+                messagebox.showwarning(
+                    "Cuenta no aprobada",
+                    "La cuenta aún no está aprobada.\n"
+                    "Por favor contacte a otro administrador para que apruebe su cuenta.",
+                    parent=self,
+                )
+                return
+
+            admin = Admin(
+                full_name=row[1],
+                email=row[2],
+                phone=row[3],
+                db_id=row[0],
+                email_verified=row[5],  # This is the account type, per your updated schema
+                account_status=row[6],
+            )
+
+            self.controller.current_user = admin
+            self.controller.current_person = admin
+
+            DashboardFormular(self.controller, admin, admin)
+
+        except Exception as error:
             messagebox.showerror(
-                "Inicio de sesión fallido",
-                "Correo electrónico o contraseña incorrectos.",
+                "Error de conexión",
+                f"No se pudo iniciar sesión.\n{error}",
                 parent=self,
             )
-            return
-        self.controller.current_user = user
 
-        # Busca la persona ligada a la cuenta (misma db_id) en la "base de datos"
-        # interna. Se guarda en el controller para que otras páginas la usen.
-        self.controller.current_person = get_person_by_user(user)
-
-        # TODO: agregar aquí la validación con la base de datos.
-        # Mientras tanto el acceso es libre para poder probar la aplicación.
-
-        # El dashboard recibe la cuenta y la persona activas para que la
-        # barra superior muestre el nombre y el correo de quien inició sesión.
+        finally:
+            if cursor is not None:
+                cursor.close()
+            if connection is not None:
+                connection.close()
+        """
+        Stored just in case that it is needed.
         DashboardFormular(
             self.controller,
             self.controller.current_user,
             self.controller.current_person,
         )
+        """
+
 
     def forgot_password_action(self):
         messagebox.showinfo(
@@ -250,9 +286,9 @@ class RegisterFormular(AccountsFormular):
             )
             return
 
-        self.is_institutional_email(email, full_name, phone)
+        self.create_account(email, full_name, phone)
 
-    def is_institutional_email(self, email, full_name, phone):
+    def create_account(self, email, full_name, phone):
         # Valida si el correo es institucional para guardarlo como tal en la BD.
         institutional_email = email.lower().endswith("@utr.edu.mx")
         self.connection = start_connection()
@@ -264,6 +300,7 @@ class RegisterFormular(AccountsFormular):
                 f"¡Cuenta creada!\nNombre: {full_name}\nCorreo: {email}",
                 parent=self,
             )
+            email_type = 'institutional'
 
         else:
             messagebox.showinfo(
@@ -271,6 +308,7 @@ class RegisterFormular(AccountsFormular):
                 f"¡Cuenta creada!\nNombre: {full_name}\nCorreo: {email}",
                 parent=self,
             )
+            email_type = 'personal'
 
         try:
             #Primero se mete la persona (y de paso se obtiene el id)
@@ -278,14 +316,15 @@ class RegisterFormular(AccountsFormular):
                 cursor,
                 full_name,
                 email,
-                phone,
-                institutional_email,
+                phone
             )
             #Luego se mete la cuenta
             insert_account(
                 cursor,
                 self.id,
                 hash_password(self.password_entry.get()),
+                email_type
+
             )
             #Al final se mete al admin
             insert_administrator(cursor, self.id)
@@ -298,3 +337,4 @@ class RegisterFormular(AccountsFormular):
         #NO TOCAR!!!!
         self.connection.commit()
         #Sin esa linea los cambios no se meten bien a bd incluso si la conexion se hace bien
+        #Para pruebas, hacer las consultas sin el commit()

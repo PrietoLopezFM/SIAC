@@ -7,24 +7,24 @@
 # ----------------------------------------------------------------------------
 
 # CONSTANT (used for all persons given that each need a person and account)
-def insert_person(cursor, full_name, email, phone, institutional_email):
+def insert_person(cursor, full_name, email, phone):
     cursor.execute(
         """
-        INSERT INTO person (full_name, email, phone, institutional_email)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO person (full_name, email, phone)
+        VALUES (%s, %s, %s)
         """,
-        (full_name, email, phone, institutional_email),
+        (full_name, email, phone),
     )
     return cursor.lastrowid
 
 
-def insert_account(cursor, person_id, password_hash):
+def insert_account(cursor, person_id, password_hash, email_verified):
     cursor.execute(
         """
-        INSERT INTO account (person_id, password_hash)
-        VALUES (%s, %s)
+        INSERT INTO account (person_id, password_hash, email_verified)
+        VALUES (%s, %s, %s)
         """,
-        (person_id, password_hash),
+        (person_id, password_hash, email_verified),
     )
 
 # 1.1 Create a student.
@@ -197,7 +197,6 @@ def get_student_details(cursor):
             p.person_id,
             p.full_name,
             p.email,
-            p.institutional_email,
             p.phone,
             s.student_number,
             s.sex,
@@ -221,7 +220,6 @@ def get_instructor_details(cursor):
             p.person_id,
             p.full_name,
             p.email,
-            p.institutional_email,
             p.phone,
             i.employee_number,
             acc.email_verified,
@@ -242,7 +240,6 @@ def get_administrator_details(cursor):
             p.person_id,
             p.full_name,
             p.email,
-            p.institutional_email,
             p.phone,
             acc.email_verified,
             acc.status AS account_status
@@ -443,3 +440,23 @@ def get_user_id(cursor):
         """
     )
     return cursor.lastrowid
+
+def get_administrator_by_email(cursor, email):
+    cursor.execute(
+        """
+        SELECT
+            p.person_id,
+            p.full_name,
+            p.email,
+            p.phone,
+            acc.password_hash,
+            acc.email_verified,
+            acc.status AS account_status
+        FROM administrator adm
+        JOIN person p ON adm.person_id = p.person_id
+        JOIN account acc ON adm.person_id = acc.person_id
+        WHERE p.email = %s
+        """,
+        (email,),
+    )
+    return cursor.fetchone()
