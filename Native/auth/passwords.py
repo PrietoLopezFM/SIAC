@@ -15,11 +15,13 @@ def verify_password(stored_hash, password):
     except (VerifyMismatchError, InvalidHashError):
         return False
 
-
+"""
 # Test 1
 stored_hash = hash_password("john")  # Save this hash in the database.
 matches = verify_password(stored_hash, "john")
-
 print(matches)  # True
 
 # Test 2
+b = hash_password("I have a bomb in my ASS")
+print(verify_password(b, input()))
+"""

@@ -6,6 +6,9 @@
       <sourceFolder url="file://$MODULE_DIR$/Native/formulario" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/Native/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/Native/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/Localdb" />
+      <excludeFolder url="file://$MODULE_DIR$/Localdb/Full" />
+      <excludeFolder url="file://$MODULE_DIR$/Localdb/Oversimplified" />
     </content>
     <orderEntry type="jdk" jdkName="U:\Big-Projects\SIAC\Native\.venv" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -4,7 +4,15 @@ from tkinter import messagebox
 from config import constants as cons
 from dashboard import DashboardFormular
 
-from models import authenticate_mock, get_person_by_user
+from auth.passwords import hash_password
+
+from model import authenticate_mock, get_person_by_user
+
+from models.user import User
+
+from database.connection import start_connection
+from database.queries import insert_person, insert_account, insert_administrator
+
 
 # Fondo de las vistas: el mismo del frame blanco de form_handler.
 BG = "white"
@@ -247,6 +255,8 @@ class RegisterFormular(AccountsFormular):
     def is_institutional_email(self, email, full_name, phone):
         # Valida si el correo es institucional para guardarlo como tal en la BD.
         institutional_email = email.lower().endswith("@utr.edu.mx")
+        self.connection = start_connection()
+        cursor = self.connection.cursor()
 
         if institutional_email:
             messagebox.showinfo(
@@ -255,16 +265,6 @@ class RegisterFormular(AccountsFormular):
                 parent=self,
             )
 
-            """
-            MYSQL QUERY (Connection not yet implemented)
-            INSERT INTO person (full_name, email, phone, institutional_email)
-            VALUES ('full_name', 'email', 'phone', TRUE);
-            SET @student_person_id = LAST_INSERT_ID();
-            INSERT INTO account (person_id, password_hash)
-            VALUES (@student_person_id, 'password');
-            INSERT INTO student (person_id)
-            VALUES (@student_person_id);
-            """
         else:
             messagebox.showinfo(
                 "Correo personal",
@@ -272,13 +272,29 @@ class RegisterFormular(AccountsFormular):
                 parent=self,
             )
 
-            """
-            MYSQL QUERY (Connection not yet implemented)
-            INSERT INTO person (full_name, email, phone, institutional_email)
-            VALUES ('full_name', 'email', 'phone', FALSE);
-            SET @student_person_id = LAST_INSERT_ID();
-            INSERT INTO account (person_id, password_hash)
-            VALUES (@student_person_id, 'password');
-            INSERT INTO student (person_id)
-            VALUES (@student_person_id);
-            """
+        try:
+            #Primero se mete la persona (y de paso se obtiene el id)
+            self.id = insert_person(
+                cursor,
+                full_name,
+                email,
+                phone,
+                institutional_email,
+            )
+            #Luego se mete la cuenta
+            insert_account(
+                cursor,
+                self.id,
+                hash_password(self.password_entry.get()),
+            )
+            #Al final se mete al admin
+            insert_administrator(cursor, self.id)
+
+            # Commit the transaction here, using your connection.
+        except Exception:
+            messagebox.showerror("Error desconocido") #Si
+            raise
+
+        #NO TOCAR!!!!
+        self.connection.commit()
+        #Sin esa linea los cambios no se meten bien a bd incluso si la conexion se hace bien

@@ -5,7 +5,7 @@ from tkinter import filedialog, messagebox
 from components.left_menu import LeftMenu
 from components.top_bar import TopBar
 from config import constants as cons
-from models import get_students
+from model import get_students
 
 
 def get_student_rows():
