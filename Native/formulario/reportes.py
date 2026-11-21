@@ -9,7 +9,7 @@ from model import get_students
 
 
 def get_report_rows(periods):
-    """Build the table rows from the students in the database (mock for now).
+    """Build the table rows from the students in the database.
 
     Only students are listed (no administrators nor instructors).
     periods: the period headings (e.g. "Sep-Dic 2026"); each one shows the

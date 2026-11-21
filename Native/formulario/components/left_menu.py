@@ -1,7 +1,7 @@
 import tkinter as tk
 
-from config.constants import COLOR_BACKGROUND_LEFT_MENU, COLOR_LEFT_MENU_HOVER_GREEN, COLOR_LEFT_MENU_HOVER_GREEN_TEXT, \
-    COLOR_SUBTITLE_TEXT
+from config.constants import *
+
 
 # NOTE: DashboardFormular, StudentsFormular and ReportesFormular are imported
 # inside their button methods on purpose. Those windows import LeftMenu
@@ -28,38 +28,46 @@ class LeftMenu(tk.Frame):
         items = [
             {
                 "text": "Dashboard",
-                "image_route": "resources/placeholder.png",
+                "image_route": "resources/default/dashboard_default.png",
+                "hover_image_route": "resources/hover/dashboard_hover.png",
                 "command": self.dashboard_button,
             },
             {
                 "text": "Activities",
-                "image_route": "resources/placeholder.png",
+                "image_route": "resources/default/activities_default.png",
+                "hover_image_route": "resources/hover/activities_hover.png",
                 "command": self.activities_button,
             },
             {
                 "text": "Students",
-                "image_route": "resources/placeholder.png",
+                "image_route": "resources/default/students_default.png",
+                "hover_image_route": "resources/hover/students_hover.png",
                 "command": self.students_button,
             },
             {
-                "text": "Announcements",
-                "image_route": "resources/placeholder.png",
+                "text": "Announcements",            #Announcement
+                "image_route": "resources/default/announcements_default.png",
+                "hover_image_route": "resources/hover/announcements_hover.png",
                 "command": self.announcements_button,
             },
             {
                 "text": "Reports",
-                "image_route": "resources/placeholder.png",
+                "image_route": "resources/default/reports_default.png",
+                "hover_image_route": "resources/hover/reports_hover.png",
                 "command": self.reports_button,
             },
             {
                 "text": "Configuration",
-                "image_route": "resources/placeholder.png",
+                "image_route": "resources/default/settings_default.png",
+                "hover_image_route": "resources/hover/settings_hover.png",
                 "command": self.configuration_button,
             },
             {
                 "text": "Log off",
-                "image_route": "resources/placeholder.png",
+                "image_route": "resources/default/logout_default.png",
+                "hover_image_route": "resources/default/logout_default.png",
                 "command": self.log_off_button,
+                "logout": True,
             },
         ]
         # Keep references to the images so Tkinter can display them.
@@ -71,8 +79,10 @@ class LeftMenu(tk.Frame):
         # I really love dictionaries
         for item in items:
             image = tk.PhotoImage(file=item["image_route"])
-            self.images.append(image)
+            hover_image = tk.PhotoImage(file=item["hover_image_route"])
+            self.images.extend((image, hover_image))
 
+            is_logout = item.get("logout", False)
             button = tk.Button(
                 self,
                 text=item["text"],
@@ -84,11 +94,23 @@ class LeftMenu(tk.Frame):
                 padx=10,
                 pady=6,
                 bg=COLOR_BACKGROUND_LEFT_MENU,
-                fg=COLOR_SUBTITLE_TEXT,
-                activebackground=COLOR_LEFT_MENU_HOVER_GREEN,
-                activeforeground=COLOR_LEFT_MENU_HOVER_GREEN_TEXT
+                fg=COLOR_LEFT_MENU_RED_TEXT if is_logout else COLOR_SUBTITLE_TEXT,
+                activebackground=COLOR_LEFT_MENU_HOVER_RED if is_logout else COLOR_LEFT_MENU_HOVER_GREEN,
+                activeforeground=COLOR_LEFT_MENU_RED_TEXT if is_logout else COLOR_LEFT_MENU_HOVER_GREEN_TEXT
             )
             button.pack(fill="x") #The button expands to fill the space in X
+
+            hover_background = COLOR_LEFT_MENU_HOVER_RED if is_logout else COLOR_LEFT_MENU_HOVER_GREEN
+            button.bind(
+                "<Enter>",
+                lambda event, button=button, hover_image=hover_image, hover_background=hover_background:
+                    button.configure(image=hover_image, bg=hover_background)
+            )
+            button.bind(
+                "<Leave>",
+                lambda event, button=button, image=image:
+                    button.configure(image=image, bg=COLOR_BACKGROUND_LEFT_MENU)
+            )
 
     def open_window(self, window_class):
         """Close the current window and open another one in its place.
@@ -127,3 +149,21 @@ class LeftMenu(tk.Frame):
 
     def log_off_button(self):
         pass
+
+
+"""
+Native/resources/default/activities_default.png
+Native/resources/default/announcements_default.png
+Native/resources/default/dashboard_default.png
+Native/resources/default/students_default.png
+Native/resources/default/trophy_default.png
+Native/resources/default/settings_default.png
+Native/resources/default/reports_default.png
+Native/resources/default/logout_default.png
+Native/resources/hover/settings_hover.png
+Native/resources/hover/dashboard_hover.png
+Native/resources/hover/reports_hover.png
+Native/resources/hover/announcements_hover.png
+Native/resources/hover/activities_hover.png
+Native/resources/hover/students_hover.png
+"""

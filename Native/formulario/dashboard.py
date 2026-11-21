@@ -59,9 +59,6 @@ class DashboardFormular(tk.Toplevel):
         content.grid(row=1, column=1, sticky="nsew")
         content.grid_columnconfigure(0, weight=1)
 
-        tk.Label(content, text="").grid(
-            row=0, column=0, sticky="w", padx=20, pady=20
-        )
 
         tarjetasclubs = PanelPrincipal(self)
         tarjetasclubs.grid(row=1, column=1, sticky="w")
