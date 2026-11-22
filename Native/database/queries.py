@@ -252,61 +252,67 @@ def get_administrator_details(cursor):
 
 
 # Test 3: Show accounts pending approval accounts
-def get_pending_accounts(cursor):
+ROLE_TABLES = {
+    "student": "student",
+    "administrator": "administrator",
+    "instructor": "instructor",
+}
+
+
+def get_accounts_by_status(cursor, account_type, status):
+    role_table = ROLE_TABLES.get(account_type)
+    if role_table is None:
+        raise ValueError(f"Unsupported account type: {account_type}")
+
+    if status not in ("pending", "approved"):
+        raise ValueError(f"Unsupported account status: {status}")
+
+    # role_table comes from the whitelist above, not user input.
     cursor.execute(
-        """
+        f"""
         SELECT
             p.person_id,
             p.full_name,
             p.email,
-            acc.status AS account_status,
-            acc.email_verified
+            p.phone,
+            acc.email_verified AS email_type,
+            acc.approved_at,
+            approver.full_name AS approved_by
         FROM account acc
-        JOIN person p ON acc.person_id = p.person_id
+        JOIN {role_table} role ON role.person_id = acc.person_id
+        JOIN person p ON p.person_id = acc.person_id
+        LEFT JOIN person approver ON approver.person_id = acc.approved_by
         WHERE acc.status = %s
+        ORDER BY p.full_name
         """,
-        ("pending",),
+        (status,),
     )
     return cursor.fetchall()
 
 
-# Test 3.1 Show accounts pending approval (administrators)
-def get_pending_administrator_accounts(cursor):
+def approve_account(cursor, person_id, admin_person_id, account_type):
+    role_table = ROLE_TABLES.get(account_type)
+    if role_table is None:
+        raise ValueError(f"Unsupported account type: {account_type}")
+
     cursor.execute(
-        """
-        SELECT
-            p.person_id,
-            p.full_name,
-            p.email,
-            acc.status AS account_status
-        FROM account acc
-        JOIN administrator adm ON acc.person_id = adm.person_id
-        JOIN person p ON acc.person_id = p.person_id
-        WHERE acc.status = %s
+        f"""
+        UPDATE account acc
+        JOIN {role_table} role ON role.person_id = acc.person_id
+        SET acc.status = 'approved',
+            acc.approved_by = %s,
+            acc.approved_at = NOW()
+        WHERE acc.person_id = %s
+          AND acc.status = 'pending'
+          AND EXISTS (
+              SELECT 1
+              FROM administrator admin
+              WHERE admin.person_id = %s
+          )
         """,
-        ("pending",),
+        (admin_person_id, person_id, admin_person_id),
     )
-    return cursor.fetchall()
-
-
-# Test 3.2 Show accounts pending approval (instructors)
-def get_pending_instructor_accounts(cursor):
-    cursor.execute(
-        """
-        SELECT
-            p.person_id,
-            p.full_name,
-            p.email,
-            i.employee_number,
-            acc.status AS account_status
-        FROM account acc
-        JOIN instructor i ON acc.person_id = i.person_id
-        JOIN person p ON acc.person_id = p.person_id
-        WHERE acc.status = %s
-        """,
-        ("pending",),
-    )
-    return cursor.fetchall()
+    return cursor.rowcount
 
 
 # Test 4: Show activities qwith their data

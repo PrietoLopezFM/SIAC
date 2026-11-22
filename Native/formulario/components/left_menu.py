@@ -57,6 +57,12 @@ class LeftMenu(tk.Frame):
                 "command": self.reports_button,
             },
             {
+                "text": "Account Approval",
+                "image_route": "resources/default/acc_approval_default.png",
+                "hover_image_route": "resources/hover/acc_approval_hover.png",
+                "command": self.acc_approval_button,
+            },
+            {
                 "text": "Configuration",
                 "image_route": "resources/default/settings_default.png",
                 "hover_image_route": "resources/hover/settings_hover.png",
@@ -145,6 +151,10 @@ class LeftMenu(tk.Frame):
     def reports_button(self):
         from reportes import ReportesFormular
         self.open_window(ReportesFormular)
+
+    def acc_approval_button(self):
+        from account_approval import AccountApproval
+        self.open_window(AccountApproval)
 
     def configuration_button(self):
         pass
