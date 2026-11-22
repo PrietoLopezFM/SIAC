@@ -508,3 +508,31 @@ def get_administrator_by_email(cursor, email):
         (email,),
     )
     return cursor.fetchone()
+
+def update_person_data(
+    cursor,
+    person_id,
+    full_name,
+    email,
+    phone,
+    email_type,
+):
+    cursor.execute(
+        """
+        UPDATE person
+        SET full_name = %s,
+            email = %s,
+            phone = %s
+        WHERE person_id = %s
+        """,
+        (full_name, email, phone, person_id),
+    )
+
+    cursor.execute(
+        """
+        UPDATE account
+        SET email_verified = %s
+        WHERE person_id = %s
+        """,
+        (email_type, person_id),
+    )

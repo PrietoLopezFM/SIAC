@@ -157,10 +157,15 @@ class LeftMenu(tk.Frame):
         self.open_window(AccountApproval)
 
     def configuration_button(self):
-        pass
+        from settings import SettingsPage
+        self.open_window(SettingsPage)
 
     def log_off_button(self):
-        pass
+        app_root = self.winfo_toplevel()
+
+        while app_root.master is not None:
+            app_root = app_root.master
+        app_root.destroy()
 
 
 """
