@@ -1,9 +1,12 @@
 import tkinter as tk
+from PIL import Image, ImageTk
 
 from config.constants import COLOR_BACKGROUND_SECONDARY_RED
 
 
 class TopBar(tk.Frame):
+    IMAGE_SIZE = (50, 50)
+
     def __init__(self, parent, user, person):
         super().__init__(parent, bg=COLOR_BACKGROUND_SECONDARY_RED)
 
@@ -15,17 +18,21 @@ class TopBar(tk.Frame):
         self.update_user_menu()
 
     def load_image(self, path):
-        image = tk.PhotoImage(file=path)
-        self.images.append(image)
-        return image
+        resampling = getattr(Image, "Resampling", Image).LANCZOS
+        image = Image.open(path).convert("RGBA")
+        image = image.resize(self.IMAGE_SIZE, resampling)
+
+        photo_image = ImageTk.PhotoImage(image, master=self)
+        self.images.append(photo_image)
+        return photo_image
 
     def build_widgets(self):
         self.configure(height=70)
         self.grid_columnconfigure(2, weight=1)
 
         # Logos
-        utr_logo = self.load_image("resources/placeholder.png")
-        wildcats_logo = self.load_image("resources/placeholder.png")
+        utr_logo = self.load_image("resources/utr_logo.png")
+        wildcats_logo = self.load_image("resources/wildcat_logo.png")
 
         tk.Label(
             self,
@@ -60,7 +67,7 @@ class TopBar(tk.Frame):
         ).pack(anchor="w")
 
         # User button
-        user_icon = self.load_image("resources/placeholder.png")
+        user_icon = self.load_image("resources/default/account_default.png")
 
         self.user_button = tk.Button(
             self,
@@ -84,8 +91,6 @@ class TopBar(tk.Frame):
         """Update the button and menu using the supplied account and person."""
         self.user_button.configure(text=f"{self.person.full_name}  ∨")
         self.user_menu.entryconfigure(0, label=self.person.full_name)
-
-        # Use the account email for the logged-in account.
         self.user_menu.entryconfigure(1, label=self.user.email)
 
     def show_user_menu(self):

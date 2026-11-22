@@ -3,6 +3,8 @@ import threading
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk
+from PIL import Image, ImageTk
+
 
 
 from config import constants as cons
@@ -168,6 +170,7 @@ class ApplicationFormular(tk.Tk):
 
     CONTENT_REL_WIDTH = 0.5
     CONTENT_REL_HEIGHT = 0.8
+    BACKGROUND_PATH = "resources/background.png"
 
     def __init__(self):
         super().__init__()
@@ -179,10 +182,15 @@ class ApplicationFormular(tk.Tk):
             "register": RegisterFormular,
         }
         self.current_view = None
+        self._background_resize_job = None
+        self._background_photo = None
 
         self.config_window()
         self.build_widgets()
         self.show_view("start")
+
+        self.bind("<Configure>", self._schedule_background_resize)
+        self.after_idle(self._resize_background)
 
     def config_window(self):
         self.title("SIAC")
@@ -192,6 +200,14 @@ class ApplicationFormular(tk.Tk):
         util_window.centrar_ventana(self, window_width, window_height)
 
     def build_widgets(self):
+        # Create the background first so the app content stays above it.
+        self._background_original = (
+            Image.open(self.BACKGROUND_PATH).convert("RGB")
+        )
+
+        self.background_label = tk.Label(self, bd=0)
+        self.background_label.place(x=0, y=0, relwidth=1, relheight=1)
+
         content = tk.Frame(self, bg="white")
         content.place(
             relx=0.5,
@@ -203,6 +219,36 @@ class ApplicationFormular(tk.Tk):
 
         self.view_container = tk.Frame(content, bg="white")
         self.view_container.pack(fill="both", expand=True, padx=10, pady=10)
+
+    def _schedule_background_resize(self, event):
+        # Ignore Configure events from child widgets.
+        if event.widget is not self:
+            return
+
+        if self._background_resize_job is not None:
+            self.after_cancel(self._background_resize_job)
+
+        self._background_resize_job = self.after(
+            40, self._resize_background
+        )
+
+    def _resize_background(self):
+        self._background_resize_job = None
+
+        width = self.winfo_width()
+        height = self.winfo_height()
+
+        if width <= 1 or height <= 1:
+            return
+
+        resampling = getattr(Image, "Resampling", Image).LANCZOS
+        resized = self._background_original.resize(
+            (width, height),
+            resampling,
+        )
+
+        self._background_photo = ImageTk.PhotoImage(resized, master=self)
+        self.background_label.configure(image=self._background_photo)
 
     def show_view(self, name):
         """Replace the current view with the requested one."""
