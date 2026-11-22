@@ -130,7 +130,9 @@ class LeftMenu(tk.Frame):
         self.open_window(DashboardFormular)
 
     def activities_button(self):
-        pass
+        from activities import ActivitiesPage
+        self.open_window(ActivitiesPage)
+
 
     def students_button(self):
         from students import StudentsFormular

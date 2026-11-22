@@ -309,25 +309,67 @@ def get_pending_instructor_accounts(cursor):
     return cursor.fetchall()
 
 
-# Test 4: Show all available offers with their main data
-def get_available_offerings(cursor):
+# Test 4: Show activities qwith their data
+# Test 4.1: Show all available clubs and extracurriculars with their main data
+def get_activity_offerings(cursor):
     cursor.execute(
         """
         SELECT
             o.offering_id,
+            a.activity_id,
             a.name AS activity_name,
             a.description,
             a.activity_type,
             a.default_credits,
+            o.max_students,
             p.full_name AS instructor_name,
-            i.employee_number
+            i.employee_number,
+            (
+                SELECT COUNT(*)
+                FROM inscription ins
+                WHERE ins.offering_id = o.offering_id
+                  AND ins.status = %s
+            ) AS student_count
         FROM offering o
         JOIN activity a ON o.activity_id = a.activity_id
         LEFT JOIN instructor i ON o.instructor_id = i.person_id
         LEFT JOIN person p ON i.person_id = p.person_id
-        """
+        WHERE LOWER(a.activity_type) IN (%s, %s)
+        """,
+        ("enrolled", "club", "extracurricular"),
     )
     return cursor.fetchall()
+
+# Test 4.2: Show all emergents
+def get_emergent_offerings(cursor):
+    cursor.execute(
+        """
+        SELECT
+            o.offering_id,
+            a.activity_id,
+            a.name AS activity_name,
+            a.description,
+            a.activity_type,
+            a.default_credits,
+            o.max_students,
+            p.full_name AS instructor_name,
+            i.employee_number,
+            (
+                SELECT COUNT(*)
+                FROM inscription ins
+                WHERE ins.offering_id = o.offering_id
+                  AND ins.status = %s
+            ) AS student_count
+        FROM offering o
+        JOIN activity a ON o.activity_id = a.activity_id
+        LEFT JOIN instructor i ON o.instructor_id = i.person_id
+        LEFT JOIN person p ON i.person_id = p.person_id
+        WHERE LOWER(a.activity_type) = %s
+        """,
+        ("enrolled", "emergent"),
+    )
+    return cursor.fetchall()
+
 
 
 # Test 5: Show all students inside an activity
